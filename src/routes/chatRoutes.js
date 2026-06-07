@@ -136,5 +136,48 @@ router.post('/feedback', (req, res) => {
   }
   res.json({ message: 'Feedback saved successfully!' });
 });
+// ─────────────────────────────────────────
+// GET /api/analytics  — dashboard stats
+// ─────────────────────────────────────────
+router.get('/analytics', (req, res) => {
+  const tickets = readTickets();
 
+  const total = tickets.length;
+  const resolved = tickets.filter(t => t.resolved).length;
+  const escalated = tickets.filter(t => t.escalated).length;
+  const unresolved = total - resolved;
+
+  // Count by emotion
+  const emotionCounts = { angry: 0, frustrated: 0, neutral: 0, calm: 0, satisfied: 0 };
+  tickets.forEach(t => {
+    if (emotionCounts[t.emotion] !== undefined) emotionCounts[t.emotion]++;
+  });
+
+  // Count by urgency
+  const urgencyCounts = { Low: 0, Medium: 0, High: 0, Critical: 0 };
+  tickets.forEach(t => {
+    if (urgencyCounts[t.urgency] !== undefined) urgencyCounts[t.urgency]++;
+  });
+
+  // Count by category
+  const categoryCounts = {};
+  tickets.forEach(t => {
+    categoryCounts[t.category] = (categoryCounts[t.category] || 0) + 1;
+  });
+
+  // Recent 5 tickets
+  const recentTickets = tickets.slice(-5).reverse();
+
+  res.json({
+    total,
+    resolved,
+    unresolved,
+    escalated,
+    resolutionRate: total > 0 ? ((resolved / total) * 100).toFixed(1) : 0,
+    emotionCounts,
+    urgencyCounts,
+    categoryCounts,
+    recentTickets
+  });
+});
 module.exports = router;
