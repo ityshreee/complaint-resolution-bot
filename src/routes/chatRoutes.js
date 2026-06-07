@@ -180,4 +180,29 @@ router.get('/analytics', (req, res) => {
     recentTickets
   });
 });
+// ─────────────────────────────────────────
+// GET /api/escalation-summary/:sessionId
+// ─────────────────────────────────────────
+router.get('/escalation-summary/:sessionId', (req, res) => {
+  const tickets = readTickets();
+  const ticket = tickets.find(t => t.sessionId === req.params.sessionId);
+
+  if (!ticket) return res.status(404).json({ error: 'Ticket not found' });
+
+  const summary = {
+    ticketId: ticket.id,
+    sessionId: ticket.sessionId,
+    createdAt: ticket.createdAt,
+    emotion: ticket.emotion,
+    urgency: ticket.urgency,
+    category: ticket.category,
+    escalationReason: ticket.escalationReason,
+    conversationSummary: ticket.messages.map(m =>
+      `[${m.role.toUpperCase()}]: ${m.content}`
+    ).join('\n'),
+    totalMessages: ticket.messages.length
+  };
+
+  res.json(summary);
+});
 module.exports = router;
