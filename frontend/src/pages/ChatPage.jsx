@@ -33,13 +33,13 @@ export default function ChatPage() {
     setLoading(true)
 
     try {
-      const res = await fetch('http://localhost:4000/api/chat', {
+      const res = await fetch('http://localhost:5000/api/chat', {  // ✅ Fix 2: port 5000
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: text, history: updated })
+        body: JSON.stringify({ message: text, sessionId: 'session-' + Date.now() })  // ✅ Fix 3: sessionId
       })
       const data = await res.json()
-      setMessages(prev => [...prev, { role: 'bot', text: data.reply, sentiment: data.sentiment, urgency: data.urgency }])
+      setMessages(prev => [...prev, { role: 'bot', text: data.botResponse, sentiment: data.emotion, urgency: data.urgency }])  // ✅ Fix 1: botResponse + emotion
       if (data.escalate) setEscalated(true)
 
       setTickets(prev => [{
