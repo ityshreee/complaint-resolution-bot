@@ -4,25 +4,26 @@ export default function ChatBox({ onSend, disabled }) {
   const [text, setText] = useState('')
 
   const handleSubmit = () => {
+    if (!text.trim() || disabled) return
     onSend(text)
     setText('')
   }
 
   return (
-    <div className="border-t border-gray-200 p-3 flex gap-2">
+    <div style={{
+      borderTop: '1px solid rgba(255,255,255,0.07)',
+      padding: '14px 16px', display: 'flex', gap: '10px', alignItems: 'center'
+    }}>
       <input
-        className="flex-1 border border-gray-300 rounded-full px-4 py-2 text-sm outline-none focus:border-blue-400"
+        className="input-dark"
         placeholder="Describe your issue..."
         value={text}
         onChange={e => setText(e.target.value)}
-        onKeyDown={e => e.key === 'Enter' && !disabled && handleSubmit()}
+        onKeyDown={e => e.key === 'Enter' && handleSubmit()}
         disabled={disabled}
       />
-      <button
-        onClick={handleSubmit}
-        disabled={disabled}
-        className="bg-blue-600 text-white px-4 py-2 rounded-full text-sm hover:bg-blue-700 disabled:opacity-50"
-      >
+      <button onClick={handleSubmit} disabled={disabled} className="btn-gradient"
+        style={{ padding: '10px 22px', fontSize: '14px', whiteSpace: 'nowrap', opacity: disabled ? 0.5 : 1 }}>
         Send
       </button>
     </div>

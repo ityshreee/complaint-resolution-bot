@@ -1,11 +1,10 @@
 import { useState, useRef, useEffect } from 'react'
 import MessageBubble from '../components/MessageBubble'
-import ChatBox from '../components/ChatBox'
 import EscalationAlert from '../components/EscalationAlert'
 
 const defaultTickets = [
   {
-    id:  '#1023',
+    id: '#1023',
     issue: 'Order not arrived',
     status: 'Escalated',
     urgency: 'Critical',
@@ -86,9 +85,12 @@ export default function ChatPage() {
   const handleSend = async (text) => {
     if (!text.trim()) return
     const updatedMessages = [...activeTicket.messages, { role: 'user', text }]
-    setTickets(prev => prev.map(t => t.id === activeTicketId ? { ...t, messages: updatedMessages, issue: t.issue === 'New conversation' ? text.slice(0, 25) + '...' : t.issue } : t))
+    setTickets(prev => prev.map(t => t.id === activeTicketId ? {
+      ...t,
+      messages: updatedMessages,
+      issue: t.issue === 'New conversation' ? text.slice(0, 25) + '...' : t.issue
+    } : t))
     setLoading(true)
-
     try {
       const res = await fetch('http://localhost:5000/api/chat', {
         method: 'POST',
@@ -96,7 +98,12 @@ export default function ChatPage() {
         body: JSON.stringify({ message: text, sessionId: activeTicketId })
       })
       const data = await res.json()
-      const botMsg = { role: 'bot', text: data.botResponse || data.reply, sentiment: data.emotion || data.sentiment, urgency: data.urgency }
+      const botMsg = {
+        role: 'bot',
+        text: data.botResponse || data.reply,
+        sentiment: data.emotion || data.sentiment,
+        urgency: data.urgency
+      }
       setTickets(prev => prev.map(t => t.id === activeTicketId ? {
         ...t,
         messages: [...updatedMessages, botMsg],
@@ -113,83 +120,190 @@ export default function ChatPage() {
     setLoading(false)
   }
 
-  const statusStyle = {
-    'Resolved': 'bg-green-100 text-green-700',
-    'Escalated': 'bg-red-100 text-red-700',
-    'Pending': 'bg-yellow-100 text-yellow-700',
-  }
+  const now = new Date()
+  const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+  const greeting = now.getHours() < 12 ? 'Morning' : now.getHours() < 17 ? 'Afternoon' : 'Evening'
 
-  const urgencyDot = {
-    'Low': 'bg-green-400',
-    'Medium': 'bg-yellow-400',
-    'High': 'bg-orange-400',
-    'Critical': 'bg-red-500',
-  }
+  const statusBg = { Resolved: 'rgba(50,200,130,0.12)', Escalated: 'rgba(255,50,50,0.12)', Pending: 'rgba(255,200,50,0.12)' }
+  const statusColor = { Resolved: '#32c882', Escalated: '#ff4d6d', Pending: '#ffc832' }
+  const statusBorder = { Resolved: 'rgba(50,200,130,0.2)', Escalated: 'rgba(255,50,50,0.2)', Pending: 'rgba(255,200,50,0.2)' }
+  const urgencyColor = { Low: '#32c882', Medium: '#ffc832', High: '#ff8232', Critical: '#ff3232' }
 
   return (
-    <div className="max-w-5xl mx-auto mt-8 px-4 flex gap-4">
+    <div style={{
+      maxWidth: '1500px', margin: '0 auto',
+      padding: '28px 32px',
+      display: 'grid',
+      gridTemplateColumns: '320px 1fr',
+      gap: '24px',
+    }}>
 
       {/* Sidebar */}
-      <div className="w-64 flex-shrink-0">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="text-sm font-medium text-gray-500">Recent Tickets</h3>
-          <button
-            onClick={handleNewChat}
-            className="text-xs bg-blue-600 text-white px-3 py-1 rounded-full hover:bg-blue-700"
-          >
-            + New
-          </button>
+      <div>
+        <div style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          marginBottom: '16px', gap: '12px',
+          borderLeft: '2px solid rgba(124,92,255,0.3)', paddingLeft: '10px'
+        }}>
+          <span style={{ fontSize: '13px', fontWeight: 600, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.08em', whiteSpace: 'nowrap' }}>Recent Tickets</span>
+          <button onClick={handleNewChat} className="btn-gradient" style={{ fontSize: '12px', padding: '5px 14px', whiteSpace: 'nowrap', flexShrink: 0 }}>+ New</button>
         </div>
-        <div className="flex flex-col gap-2">
-          {tickets.map(ticket => (
-            <div
-              key={ticket.id}
-              onClick={() => { setActiveTicketId(ticket.id); setEscalated(false) }}
-              className={`p-3 rounded-xl border cursor-pointer transition-colors ${activeTicketId === ticket.id ? 'border-blue-300 bg-blue-50' : 'border-gray-200 bg-white hover:border-gray-300'}`}
-            >
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-xs font-medium text-gray-500">{ticket.id}</span>
-                <span className={`w-2 h-2 rounded-full ${urgencyDot[ticket.urgency] || 'bg-gray-300'}`}></span>
-              </div>
-              <p className="text-xs text-gray-700 mb-2 leading-snug">{ticket.issue}</p>
-              <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${statusStyle[ticket.status]}`}>
-                {ticket.status}
-              </span>
+        {tickets.map(ticket => (
+          <div key={ticket.id}
+            className={`ticket-card ${activeTicketId === ticket.id ? 'active' : ''}`}
+            onClick={() => { setActiveTicketId(ticket.id); setEscalated(false) }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+              <span style={{ fontSize: '13px', fontWeight: 600, color: 'rgba(255,255,255,0.4)' }}>{ticket.id}</span>
+              <span style={{
+                width: '8px', height: '8px', borderRadius: '50%', display: 'inline-block',
+                background: urgencyColor[ticket.urgency] || '#aaa',
+                boxShadow: `0 0 8px ${urgencyColor[ticket.urgency] || '#aaa'}`
+              }} />
             </div>
-          ))}
-        </div>
+            <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.85)', marginBottom: '8px', lineHeight: 1.4 }}>{ticket.issue}</p>
+            <span style={{
+              fontSize: '11px', fontWeight: 600, padding: '3px 10px', borderRadius: '999px',
+              background: statusBg[ticket.status],
+              color: statusColor[ticket.status]
+            }}>{ticket.status}</span>
+          </div>
+        ))}
       </div>
 
-      {/* Chat */}
-      <div className="flex-1">
+      {/* Right side */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+
+        {/* Header */}
+        <div>
+          <h2 style={{ fontSize: '22px', fontWeight: 700, marginBottom: '4px' }}>
+            <span style={{
+              background: 'linear-gradient(90deg, #ffffff, #ff6b3d)',
+              WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent'
+            }}>Good {greeting}</span> 👋
+          </h2>
+          <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.3)', lineHeight: 1.5 }}>
+            Support Overview · Track ticket resolution, escalation trends, and customer satisfaction in real time.
+          </p>
+        </div>
+
         {escalated && <EscalationAlert onClose={() => setEscalated(false)} />}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 flex flex-col h-[70vh]">
-          <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
-            <div>
-              <span className="text-sm font-medium text-gray-700">{activeTicket?.id}</span>
-              <span className="text-xs text-gray-400 ml-2">{activeTicket?.issue}</span>
+
+        {/* Chat window */}
+        <div className="chat-container" style={{
+          borderRadius: '24px',
+          display: 'flex',
+          flexDirection: 'column',
+          height: 'calc(100vh - 280px)',
+        }}>
+
+          {/* Chat header */}
+          <div style={{
+            padding: '16px 20px',
+            background: 'rgba(255,255,255,0.02)',
+            borderBottom: '1px solid rgba(255,255,255,0.06)',
+            borderRadius: '24px 24px 0 0',
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div style={{
+                width: '34px', height: '34px', borderRadius: '10px',
+                background: 'linear-gradient(135deg, #7c5cff, #4d7cff)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: '16px', boxShadow: '0 0 15px rgba(124,92,255,0.4)'
+              }}>🤖</div>
+              <div>
+                <div style={{ fontSize: '13px', fontWeight: 600, color: 'rgba(255,255,255,0.9)' }}>
+                  {activeTicket?.id} · {activeTicket?.issue}
+                </div>
+                <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.3)', marginTop: '2px' }}>
+                  ResolvBot AI · Always active
+                </div>
+              </div>
             </div>
-            <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${statusStyle[activeTicket?.status]}`}>
-              {activeTicket?.status}
-            </span>
+            <span style={{
+              fontSize: '11px', fontWeight: 600, padding: '4px 14px', borderRadius: '999px',
+              background: statusBg[activeTicket?.status],
+              color: statusColor[activeTicket?.status],
+              border: `1px solid ${statusBorder[activeTicket?.status]}`
+            }}>{activeTicket?.status}</span>
           </div>
-          <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-3">
-            {activeTicket?.messages.map((msg, i) => <MessageBubble key={i} msg={msg} />)}
+
+          {/* Messages */}
+          <div style={{ flex: 1, overflowY: 'auto', padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            {activeTicket?.messages.map((msg, i) => (
+              <div key={i} className="fade-in">
+                {msg.role === 'bot' ? (
+                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+                    <div style={{
+                      width: '28px', height: '28px', borderRadius: '8px', flexShrink: 0,
+                      background: 'linear-gradient(135deg, #7c5cff, #4d7cff)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      fontSize: '14px', boxShadow: '0 0 10px rgba(124,92,255,0.3)', marginTop: '2px'
+                    }}>🤖</div>
+                    <div style={{ flex: 1 }}>
+                      <MessageBubble msg={msg} />
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <MessageBubble msg={msg} />
+                    <div style={{ textAlign: 'right', fontSize: '10px', color: 'rgba(255,255,255,0.2)', marginTop: '4px', paddingRight: '4px' }}>{timeStr}</div>
+                  </div>
+                )}
+              </div>
+            ))}
             {loading && (
-              <div className="flex justify-start">
-                <div className="bg-gray-100 rounded-2xl px-4 py-3 flex items-center gap-1.5">
-                  <span className="w-2 h-2 bg-gray-400 rounded-full dot-1 inline-block"></span>
-                  <span className="w-2 h-2 bg-gray-400 rounded-full dot-2 inline-block"></span>
-                  <span className="w-2 h-2 bg-gray-400 rounded-full dot-3 inline-block"></span>
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+                <div style={{
+                  width: '28px', height: '28px', borderRadius: '8px', flexShrink: 0,
+                  background: 'linear-gradient(135deg, #7c5cff, #4d7cff)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px'
+                }}>🤖</div>
+                <div className="bot-bubble" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span className="dot-1" style={{ width: '7px', height: '7px', background: 'rgba(255,255,255,0.4)', borderRadius: '50%', display: 'inline-block' }} />
+                  <span className="dot-2" style={{ width: '7px', height: '7px', background: 'rgba(255,255,255,0.4)', borderRadius: '50%', display: 'inline-block' }} />
+                  <span className="dot-3" style={{ width: '7px', height: '7px', background: 'rgba(255,255,255,0.4)', borderRadius: '50%', display: 'inline-block' }} />
                 </div>
               </div>
             )}
             <div ref={bottomRef} />
           </div>
-          <ChatBox onSend={handleSend} disabled={loading} />
+
+          {/* Input bar */}
+          <div style={{
+            borderTop: '1px solid rgba(255,255,255,0.06)',
+            padding: '14px 20px', display: 'flex', gap: '10px', alignItems: 'center',
+            borderRadius: '0 0 24px 24px',
+            background: 'rgba(255,255,255,0.02)'
+          }}>
+            <div style={{ fontSize: '18px', cursor: 'pointer', color: 'rgba(255,255,255,0.25)' }}>📎</div>
+            <input
+              id="chat-input"
+              className="input-dark"
+              placeholder="Describe your issue..."
+              onKeyDown={e => {
+                if (e.key === 'Enter' && e.target.value.trim()) {
+                  handleSend(e.target.value)
+                  e.target.value = ''
+                }
+              }}
+              disabled={loading}
+            />
+            <div style={{ fontSize: '18px', cursor: 'pointer', color: 'rgba(255,255,255,0.25)' }}>✨</div>
+            <button
+              onClick={() => {
+                const input = document.getElementById('chat-input')
+                if (input && input.value.trim()) { handleSend(input.value); input.value = '' }
+              }}
+              disabled={loading}
+              className="btn-gradient"
+              style={{ padding: '10px 24px', fontSize: '14px', whiteSpace: 'nowrap', opacity: loading ? 0.5 : 1 }}
+            >
+              Send ➜
+            </button>
+          </div>
         </div>
       </div>
-
     </div>
   )
 }
