@@ -92,7 +92,7 @@ export default function ChatPage() {
     } : t))
     setLoading(true)
     try {
-      const res = await fetch('https://complaint-resolution-bot.onrender.com/api/chat', {
+      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: text, sessionId: activeTicketId })
