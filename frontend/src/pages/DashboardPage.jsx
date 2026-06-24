@@ -6,7 +6,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true)
 
   const fetchAnalytics = () => {
-    fetch('https://complaint-resolution-bot-production.up.railway.app/api/analytics')
+    fetch('/api/analytics')
       .then(res => res.json())
       .then(d => { setData(d); setLoading(false) })
       .catch(() => setLoading(false))
