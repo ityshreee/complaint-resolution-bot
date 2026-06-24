@@ -30,23 +30,17 @@ npm run dev
 Open **http://localhost:5173**
 
 ## Folder Structure
+```
 src/
-
 ├── pages/
-
 │   ├── ChatPage.jsx       # Main chat interface
-
 │   └── DashboardPage.jsx  # Analytics dashboard
-
 ├── components/
-
 │   ├── MessageBubble.jsx  # Chat message component
-
 │   ├── ChatBox.jsx        # Input bar
-
 │   └── EscalationAlert.jsx
-
 └── App.jsx
+```
 
 ---
 *Built by Mahi Ruhela for FlowZint AI Hackathon 2026*

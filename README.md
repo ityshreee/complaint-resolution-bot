@@ -66,26 +66,18 @@ Open **http://localhost:5173**
 ---
 
 ## 📁 Project Structure
+```
 complaint-resolution-bot/
-
 ├── frontend/          # React app (Mahi Ruhela)
-
 │   ├── src/
-
 │   │   ├── pages/     # ChatPage, DashboardPage
-
 │   │   ├── components/# MessageBubble, ChatBox, etc.
-
 │   │   └── App.jsx
-
 ├── src/               # Backend (Ity Shree)
-
 │   ├── routes/        # chat, analytics routes
-
 │   └── services/      # AI service, stats store
-
 └── server.js
-
+```
 ---
 
 ## 🎯 How It Works
