@@ -47,39 +47,44 @@ ResolvBot is an AI-powered customer support agent that intelligently resolves cu
 ## 🏃 How to Run Locally
 
 ### Backend
-\`\`\`bash
-cd complaint-resolution-bot
+```bash
 npm install
 cp .env.example .env
 # Add your GEMINI_API_KEY to .env
 node server.js
-\`\`\`
+```
 
 ### Frontend
-\`\`\`bash
+```bash
 cd frontend
 npm install
 npm run dev
-\`\`\`
+```
 
 Open **http://localhost:5173**
 
 ---
 
 ## 📁 Project Structure
-
-\`\`\`
 complaint-resolution-bot/
+
 ├── frontend/          # React app (Mahi Ruhela)
+
 │   ├── src/
+
 │   │   ├── pages/     # ChatPage, DashboardPage
+
 │   │   ├── components/# MessageBubble, ChatBox, etc.
+
 │   │   └── App.jsx
+
 ├── src/               # Backend (Ity Shree)
+
 │   ├── routes/        # chat, analytics routes
+
 │   └── services/      # AI service, stats store
+
 └── server.js
-\`\`\`
 
 ---
 
@@ -93,17 +98,6 @@ complaint-resolution-bot/
    - High urgency → guided step-by-step resolution
    - Critical / very angry → escalates to human agent
 5. Every interaction updates the **live analytics dashboard**
-
----
-
-## 🔌 API Endpoints
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | /api/chat | Send message, get AI response |
-| GET | /api/tickets | Get all complaint tickets |
-| GET | /api/analytics | Get dashboard statistics |
-| GET | /api/escalation-summary/:sessionId | Get escalation summary |
 
 ---
 
