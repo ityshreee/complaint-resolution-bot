@@ -72,7 +72,7 @@ export default function ChatPage() {
       return '#1023'
     }
   })
-
+  const [filter, setFilter] = useState('All')
   const [escalated, setEscalated] = useState(false)
   const [loading, setLoading] = useState(false)
   const bottomRef = useRef(null)
@@ -167,15 +167,30 @@ export default function ChatPage() {
 
       {/* Sidebar */}
       <div>
-        <div style={{
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          marginBottom: '16px', gap: '12px',
-          borderLeft: '2px solid rgba(124,92,255,0.3)', paddingLeft: '10px'
-        }}>
-          <span style={{ fontSize: '13px', fontWeight: 600, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.08em', whiteSpace: 'nowrap' }}>Recent Tickets</span>
-          <button onClick={handleNewChat} className="btn-gradient" style={{ fontSize: '12px', padding: '5px 14px', whiteSpace: 'nowrap', flexShrink: 0 }}>+ New</button>
+        <div style={{ marginBottom: '16px' }}>
+          <div style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            marginBottom: '12px', gap: '12px',
+            borderLeft: '2px solid rgba(124,92,255,0.3)', paddingLeft: '10px'
+          }}>
+            <span style={{ fontSize: '13px', fontWeight: 600, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.08em', whiteSpace: 'nowrap' }}>Tickets</span>
+            <button onClick={handleNewChat} className="btn-gradient" style={{ fontSize: '12px', padding: '5px 14px', whiteSpace: 'nowrap', flexShrink: 0 }}>+ New</button>
+          </div>
+          <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+            {['All', 'Pending', 'Escalated', 'Resolved'].map(f => (
+              <button key={f} onClick={() => setFilter(f)} style={{
+                fontSize: '11px', padding: '4px 10px', borderRadius: '999px',
+                background: filter === f ? 'rgba(124,92,255,0.3)' : 'rgba(255,255,255,0.05)',
+                border: filter === f ? '1px solid rgba(124,92,255,0.6)' : '1px solid rgba(255,255,255,0.08)',
+                color: filter === f ? '#a78fff' : 'rgba(255,255,255,0.4)',
+                cursor: 'pointer', fontWeight: filter === f ? 600 : 400,
+                transition: 'all 0.2s'
+              }}>{f}</button>
+            ))}
+          </div>
         </div>
-        {tickets.map(ticket => (
+        <div style={{ overflowY: 'auto', maxHeight: 'calc(100vh - 200px)', paddingRight: '4px' }}>
+        {tickets.filter(t => filter === 'All' || t.status === filter).map(ticket => (
           <div key={ticket.id}
             className={`ticket-card ${activeTicketId === ticket.id ? 'active' : ''}`}
             onClick={() => { setActiveTicketId(ticket.id); setEscalated(false) }}>
@@ -195,6 +210,7 @@ export default function ChatPage() {
             }}>{ticket.status}</span>
           </div>
         ))}
+        </div>
       </div>
 
       {/* Right side */}

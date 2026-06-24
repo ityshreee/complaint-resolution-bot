@@ -5,6 +5,10 @@ import { useState } from 'react'
 export default function App() {
   const [page, setPage] = useState('chat')
 
+const changePage = (newPage) => {
+  setPage(newPage)
+  window.scrollTo(0, 0)
+}
   const navItems = [
     { id: 'chat', label: 'Chat', icon: '💬' },
     { id: 'dashboard', label: 'Analytics', icon: '📊' },
@@ -52,7 +56,7 @@ export default function App() {
         {/* Nav items */}
         <div style={{ display: 'flex', gap: '8px' }}>
           {navItems.map(item => (
-            <button key={item.id} onClick={() => setPage(item.id)} style={{
+            <button key={item.id} onClick={() => changePage(item.id)} style={{
               background: page === item.id ? 'linear-gradient(135deg, #7c5cff, #4d7cff)' : 'transparent',
               border: page === item.id ? 'none' : '1px solid rgba(255,255,255,0.08)',
               color: page === item.id ? 'white' : 'rgba(255,255,255,0.5)',
